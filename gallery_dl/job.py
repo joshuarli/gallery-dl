@@ -75,6 +75,7 @@ class Job():
             log.error("%s: %s", exc.__class__.__name__, exc)
             self.status |= exc.code
         except OSError as exc:
+#            breakpoint()
             log.error("Unable to download data:  %s: %s",
                       exc.__class__.__name__, exc)
             log.debug("", exc_info=True)
@@ -213,6 +214,7 @@ class DownloadJob(Job):
         archive = self.archive
 
         # prepare download
+#        breakpoint(
         pathfmt.set_filename(kwdict)
 
         if "prepare" in hooks:
@@ -233,29 +235,31 @@ class DownloadJob(Job):
         if self.sleep:
             time.sleep(self.sleep)
 
-        # download from URL
-        if not self.download(url):
+        if url != "nomedia":
+            # download from URL
+            if not self.download(url):
 
-            # use fallback URLs if available
-            for num, url in enumerate(kwdict.get("_fallback", ()), 1):
-                util.remove_file(pathfmt.temppath)
-                self.log.info("Trying fallback URL #%d", num)
-                if self.download(url):
-                    break
-            else:
-                # download failed
-                self.status |= 4
-                self.log.error("Failed to download %s",
-                               pathfmt.filename or url)
+                # use fallback URLs if available
+                for num, url in enumerate(kwdict.get("_fallback", ()), 1):
+                    util.remove_file(pathfmt.temppath)
+                    self.log.info("Trying fallback URL #%d", num)
+                    if self.download(url):
+                        break
+                else:
+                    # download failed
+                    self.status |= 4
+                    self.log.error("Failed to download %s",
+                                   pathfmt.filename or url)
+                    return
+
+            if not pathfmt.temppath:
+                if archive:
+                    archive.add(kwdict)
+                self.handle_skip()
                 return
 
-        if not pathfmt.temppath:
-            if archive:
-                archive.add(kwdict)
-            self.handle_skip()
-            return
-
         # run post processors
+       # breakpoint()
         if "file" in hooks:
             for callback in hooks["file"]:
                 callback(pathfmt)

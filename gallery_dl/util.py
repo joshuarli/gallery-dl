@@ -866,6 +866,7 @@ class PathFormat():
 
     def set_filename(self, kwdict):
         """Set general filename data"""
+#        breakpoint()
         self.kwdict = kwdict
         self.temppath = self.prefix = ""
 

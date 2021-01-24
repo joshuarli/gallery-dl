@@ -67,7 +67,6 @@ class MetadataPP(PostProcessor):
     def run(self, pathfmt):
         directory = self._directory(pathfmt)
         path = directory + self._filename(pathfmt)
-
         try:
             with open(path, "w", encoding="utf-8") as fp:
                 self.write(fp, pathfmt.kwdict)

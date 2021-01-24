@@ -63,12 +63,20 @@ class TwitterExtractor(Extractor):
                 self._extract_card(tweet, files)
             if self.twitpic:
                 self._extract_twitpic(tweet, files)
+
             if not files:
-                continue
+                self.log.debug("NOTE: %s (no media)", tweet["id_str"])
+#                continue
 
             tdata = self._transform_tweet(tweet)
             tdata.update(metadata)
             yield Message.Directory, tdata
+
+            if not files:
+                tdata["extension"] = "nomedia"
+                tdata["url"] = "https://twitter.com/{tweet['user']}/status/{tweet['id_str']}"
+                yield Message.Url, "nomedia", tdata
+
             for tdata["num"], file in enumerate(files, 1):
                 file.update(tdata)
                 url = file.pop("url")
